@@ -18,7 +18,7 @@ pipeline {
                         sh "kubectl delete pod ${podName}"
                     } else {
                         // Create a new pod if it doesn't exist
-                        sh "kubectl create pod your-pod-creation-command"  // Replace with your pod creation command
+                        sh "kubectl apply -f manifest.yml"  // Replace with your pod creation command
                     }
                     }
                 }
