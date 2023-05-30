@@ -1,18 +1,17 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Check Port Availability') {
             steps {
                 script {
-                    def port = 8080  // Replace with your desired port number
-                    
+                    def port = 8080 // Change the port number as per your requirement
+
                     def isPortAvailable = checkPortAvailability(port)
-                    
                     if (isPortAvailable) {
-                        println "Port ${port} is available."
+                        echo "Port ${port} is available"
                     } else {
-                        println "Port ${port} is not available."
+                        echo "Port ${port} is not available"
                     }
                 }
             }
@@ -21,10 +20,16 @@ pipeline {
 }
 
 def checkPortAvailability(port) {
-    def cmd = "bash -c 'echo \"\" > /dev/tcp/localhost/${port}'"
-    def proc = cmd.execute()
-    proc.waitFor()
-    
-    return proc.exitValue() == 0
-}
+    def socket = new java.net.Socket()
+    def isPortAvailable = true
 
+    try {
+        socket.bind(new InetSocketAddress("localhost", port))
+    } catch (BindException e) {
+        isPortAvailable = false
+    } finally {
+        socket.close()
+    }
+
+    return isPortAvailable
+}
