@@ -5,31 +5,17 @@ pipeline {
         stage('Check Port Availability') {
             steps {
                 script {
-                    def port = 8080 // Change the port number as per your requirement
+                    def port = 8080  // Replace with the desired port number
 
-                    def isPortAvailable = checkPortAvailability(port)
-                    if (isPortAvailable) {
+                    try {
+                        sh "lsof -i :${port}"
                         echo "Port ${port} is available"
-                    } else {
+                    } catch (Exception e) {
                         echo "Port ${port} is not available"
+                        // Perform actions with admin permissions
                     }
                 }
             }
         }
     }
-}
-
-def checkPortAvailability(port) {
-    def socket = new java.net.Socket()
-    def isPortAvailable = true
-
-    try {
-        socket.bind(new InetSocketAddress("localhost", port))
-    } catch (BindException e) {
-        isPortAvailable = false
-    } finally {
-        socket.close()
-    }
-
-    return isPortAvailable
 }
