@@ -5,6 +5,9 @@ pipeline {
         stage('Check and Delete Pod') {
             steps {
                 script {
+                  
+                 		withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: '', contextName: '', credentialsId: 'kubesecretfile', namespace: '', serverUrl: '']])
+                    {
                     def podName = 'projectx-pod'  // Replace with your pod name
                     
                     // Check if the pod exists
@@ -16,6 +19,7 @@ pipeline {
                     } else {
                         // Create a new pod if it doesn't exist
                         sh "kubectl create pod your-pod-creation-command"  // Replace with your pod creation command
+                    }
                     }
                 }
             }
