@@ -2,28 +2,29 @@ pipeline {
     agent any
     
     stages {
-        stage('Check and Delete Pod') {
+        stage('Check Port Availability') {
             steps {
                 script {
-                  
-                 		withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: '', contextName: '', credentialsId: 'kubesecretfile', namespace: '', serverUrl: '']])
-                    {
-                    def podName = 'projectx-pod'  // Replace with your pod name
+                    def port = 8080  // Replace with your desired port number
                     
-                    // Check if the pod exists
-                    def podExists = sh(returnStdout: true, script: "kubectl get pod ${podName} --ignore-not-found=true").trim()
+                    def isPortAvailable = checkPortAvailability(port)
                     
-                    if (podExists) {
-                        // Delete the pod if it exists
-                        sh "kubectl delete pod ${podName}"
-                        sh "kubectl apply -f manifest.yml"
+                    if (isPortAvailable) {
+                        println "Port ${port} is available."
                     } else {
-                        // Create a new pod if it doesn't exist
-                        sh "kubectl apply -f manifest.yml"  // Replace with your pod creation command
-                    }
+                        println "Port ${port} is not available."
                     }
                 }
             }
         }
     }
 }
+
+def checkPortAvailability(port) {
+    def cmd = "bash -c 'echo \"\" > /dev/tcp/localhost/${port}'"
+    def proc = cmd.execute()
+    proc.waitFor()
+    
+    return proc.exitValue() == 0
+}
+
